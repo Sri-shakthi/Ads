@@ -1,9 +1,124 @@
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { GoogleGenAI } from "@google/genai";
 import Services from './pages/Services';
 import Portfolio from './pages/Portfolio';
 import Contact from './pages/Contact';
+
+const FloatingAI = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [chatHistory, setChatHistory] = useState<{ role: 'user' | 'model', text: string }[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [chatHistory, isTyping]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim() || isTyping) return;
+
+    const userMsg = message;
+    setMessage("");
+    setChatHistory(prev => [...prev, { role: 'user', text: userMsg }]);
+    setIsTyping(true);
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: [...chatHistory.map(h => ({ role: h.role === 'user' ? 'user' : 'model', parts: [{ text: h.text }] })), { role: 'user', parts: [{ text: userMsg }] }],
+        config: {
+          systemInstruction: "You are the 'AD Studio Design Concierge'. You are professional, creative, and expert in digital design, branding, and motion graphics. Your goal is to help potential clients understand AD Studio's services (Web, Print, Motion) and help them conceptualize their projects. Keep answers concise and high-end.",
+        }
+      });
+
+      const aiText = response.text || "I'm having trouble connecting right now. Please try again or email us directly!";
+      setChatHistory(prev => [...prev, { role: 'model', text: aiText }]);
+    } catch (error) {
+      console.error(error);
+      setChatHistory(prev => [...prev, { role: 'model', text: "Apologies, I encountered an error. Please reach out to our team via the contact page." }]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  return (
+    <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end">
+      {isOpen && (
+        <div className="w-[350px] md:w-[400px] h-[500px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden mb-4 animate-fade-in-up">
+          <div className="p-4 bg-[#0e5e8a] text-white flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <div className="size-8 bg-white/20 rounded-lg flex items-center justify-center">
+                <span className="material-symbols-outlined text-sm">auto_awesome</span>
+              </div>
+              <span className="font-bold text-sm tracking-tight">Design Concierge</span>
+            </div>
+            <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1 rounded-full transition-colors">
+              <span className="material-symbols-outlined text-xl">close</span>
+            </button>
+          </div>
+          
+          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+            {chatHistory.length === 0 && (
+              <div className="text-center py-10 px-6">
+                <div className="size-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="material-symbols-outlined text-3xl text-[#0e5e8a]">stylus_note</span>
+                </div>
+                <h4 className="text-slate-900 font-bold mb-2">How can we help?</h4>
+                <p className="text-slate-500 text-xs">Ask about our web packages, brand strategy, or request a design consultation.</p>
+              </div>
+            )}
+            {chatHistory.map((chat, i) => (
+              <div key={i} className={`flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] px-4 py-2 rounded-2xl text-sm ${
+                  chat.role === 'user' 
+                  ? 'bg-[#0e5e8a] text-white rounded-tr-none' 
+                  : 'bg-slate-100 text-slate-700 rounded-tl-none'
+                }`}>
+                  {chat.text}
+                </div>
+              </div>
+            ))}
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="bg-slate-100 text-slate-400 px-4 py-2 rounded-2xl rounded-tl-none text-xs flex items-center gap-1">
+                  <span className="animate-bounce">.</span>
+                  <span className="animate-bounce [animation-delay:0.2s]">.</span>
+                  <span className="animate-bounce [animation-delay:0.4s]">.</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <form onSubmit={handleSendMessage} className="p-4 border-t border-slate-100 flex gap-2">
+            <input 
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Describe your project..."
+              className="flex-1 bg-slate-50 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-[#0e5e8a]/20"
+            />
+            <button className="size-10 bg-[#0e5e8a] text-white rounded-xl flex items-center justify-center hover:scale-105 transition-transform active:scale-95">
+              <span className="material-symbols-outlined text-xl">send</span>
+            </button>
+          </form>
+        </div>
+      )}
+      
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className={`size-16 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 ${isOpen ? 'bg-slate-900 text-white rotate-90' : 'bg-[#0e5e8a] text-white'}`}
+      >
+        <span className="material-symbols-outlined text-3xl">{isOpen ? 'close' : 'smart_toy'}</span>
+      </button>
+    </div>
+  );
+};
 
 const Navbar = () => {
   const location = useLocation();
@@ -98,6 +213,7 @@ const App: React.FC = () => {
             <Route path="/contact" element={<Contact />} />
           </Routes>
         </main>
+        <FloatingAI />
         <Footer />
       </div>
     </Router>

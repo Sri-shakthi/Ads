@@ -119,10 +119,12 @@ const Services: React.FC = () => {
               className={`glass-card rounded-3xl overflow-hidden flex flex-col lg:flex-row group animate-fade-in-up opacity-0 [animation-fill-mode:forwards]`}
               style={{ animationDelay: `${(idx + 1) * 0.1}s` }}
             >
-              <div className="lg:w-[45%] h-[320px] lg:h-auto overflow-hidden">
+              <div className="lg:w-[45%] h-[320px] lg:h-auto overflow-hidden bg-slate-100">
                 <img 
                   alt={service.title} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  loading="lazy"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-0"
+                  onLoad={(e) => (e.currentTarget.classList.add('opacity-100'))}
                   src={service.image} 
                 />
               </div>
@@ -198,7 +200,13 @@ const Services: React.FC = () => {
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <div className="size-10 rounded-full bg-slate-200 overflow-hidden">
-                      <img alt="User" src={t.img} />
+                      <img 
+                        alt="User" 
+                        loading="lazy"
+                        className="w-full h-full object-cover opacity-0 transition-opacity duration-300"
+                        onLoad={(e) => (e.currentTarget.classList.add('opacity-100'))}
+                        src={t.img} 
+                      />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-slate-900">{t.user}</p>

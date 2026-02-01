@@ -1,11 +1,60 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 
 const Contact: React.FC = () => {
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    company: '',
+    budget: '',
+    details: '',
+    services: [] as string[]
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Inquiry submitted! We'll be in touch soon.");
+    setIsSubmitting(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsSubmitting(false);
+    setIsSubmitted(true);
   };
+
+  const toggleService = (service: string) => {
+    setFormData(prev => ({
+      ...prev,
+      services: prev.services.includes(service) 
+        ? prev.services.filter(s => s !== service) 
+        : [...prev.services, service]
+    }));
+  };
+
+  if (isSubmitted) {
+    return (
+      <div className="bg-[#f0f3f4] min-h-screen flex items-center justify-center p-6">
+        <div className="max-w-[600px] w-full bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
+          <div className="h-2.5 bg-green-500 w-full"></div>
+          <div className="p-12 text-center">
+            <div className="size-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8">
+              <span className="material-symbols-outlined text-4xl text-green-500">check_circle</span>
+            </div>
+            <h2 className="text-4xl font-black text-slate-900 mb-4">Inquiry Received</h2>
+            <p className="text-slate-500 text-lg mb-10 leading-relaxed">
+              Thanks for reaching out, <span className="text-[#0e5e8a] font-bold">{formData.name}</span>! Our creative director will review your project details and get back to you within 24 hours.
+            </p>
+            <button 
+              onClick={() => setIsSubmitted(false)}
+              className="px-10 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-[#0e5e8a] transition-all"
+            >
+              Send Another Inquiry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#f0f3f4] min-h-screen">
@@ -38,15 +87,6 @@ const Contact: React.FC = () => {
                   <p className="text-xs text-slate-500">Email our team</p>
                 </div>
               </a>
-              <a className="flex items-center gap-4 group pt-2 border-t border-slate-100" href="#">
-                <div className="w-10 h-10 rounded-full bg-pink-50 flex items-center justify-center text-pink-600 group-hover:bg-pink-600 group-hover:text-white transition-all">
-                  <span className="material-symbols-outlined text-xl">camera</span>
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-800">Connect on Instagram</p>
-                  <p className="text-xs text-slate-500">@adstudio.official</p>
-                </div>
-              </a>
             </div>
 
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -57,11 +97,9 @@ const Contact: React.FC = () => {
                   <h3 className="text-lg font-bold text-slate-900">Discovery Call</h3>
                 </div>
                 <p className="text-sm text-slate-500 mb-6 leading-relaxed">Rather speak to someone? Book a 15-min intro call to discuss your vision.</p>
-                <div className="aspect-video bg-slate-50 rounded-lg border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center p-4">
-                  <span className="material-symbols-outlined text-3xl text-slate-300 mb-2">event_note</span>
-                  <p className="text-xs font-semibold text-slate-400">Calendly Widget Area</p>
-                  <button className="mt-4 text-xs font-bold text-[#0ea5e9] hover:underline">Pick a slot →</button>
-                </div>
+                <button className="w-full py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-bold hover:bg-slate-100 transition-colors flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined text-lg">event</span> Schedule Meeting
+                </button>
               </div>
             </div>
           </div>
@@ -73,18 +111,20 @@ const Contact: React.FC = () => {
                 <div className="h-2.5 bg-[#0e5e8a] w-full"></div>
                 <div className="p-8">
                   <h2 className="text-3xl font-bold text-slate-900 mb-2">Project Inquiry Form</h2>
-                  <p className="text-slate-600 text-sm">Please fill out this form and we'll get back to you within 24 hours. Required fields are marked with an asterisk (*)</p>
+                  <p className="text-slate-600 text-sm">Please fill out this form and we'll get back to you within 24 hours.</p>
                 </div>
               </div>
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-8 flex flex-col gap-8">
-                  <div className="flex flex-col gap-6">
+                  <div className="flex flex-col gap-8">
                     <label className="flex flex-col gap-3 group">
                       <span className="text-base font-semibold text-slate-900">Full Name <span className="text-red-500">*</span></span>
                       <input 
                         required
-                        className="border-b-2 border-slate-200 focus:border-[#0e5e8a] transition-all duration-300 outline-none py-2 bg-transparent text-lg placeholder:text-slate-300 placeholder:font-light focus:ring-0 px-0" 
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        className="border-b-2 border-slate-200 focus:border-[#0e5e8a] transition-all duration-300 outline-none py-2 bg-transparent text-lg placeholder:text-slate-300 focus:ring-0 px-0" 
                         placeholder="Your answer" 
                         type="text"
                       />
@@ -93,17 +133,11 @@ const Contact: React.FC = () => {
                       <span className="text-base font-semibold text-slate-900">Work Email <span className="text-red-500">*</span></span>
                       <input 
                         required
-                        className="border-b-2 border-slate-200 focus:border-[#0e5e8a] transition-all duration-300 outline-none py-2 bg-transparent text-lg placeholder:text-slate-300 placeholder:font-light focus:ring-0 px-0" 
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        className="border-b-2 border-slate-200 focus:border-[#0e5e8a] transition-all duration-300 outline-none py-2 bg-transparent text-lg placeholder:text-slate-300 focus:ring-0 px-0" 
                         placeholder="Your answer" 
                         type="email"
-                      />
-                    </label>
-                    <label className="flex flex-col gap-3">
-                      <span className="text-base font-semibold text-slate-900">Company Name</span>
-                      <input 
-                        className="border-b-2 border-slate-200 focus:border-[#0e5e8a] transition-all duration-300 outline-none py-2 bg-transparent text-lg placeholder:text-slate-300 placeholder:font-light focus:ring-0 px-0" 
-                        placeholder="Your answer" 
-                        type="text"
                       />
                     </label>
                   </div>
@@ -112,12 +146,22 @@ const Contact: React.FC = () => {
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-8">
                   <div className="flex flex-col gap-6">
                     <span className="text-base font-semibold text-slate-900">What services are you looking for? <span className="text-red-500">*</span></span>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {['Brand Identity Design', 'UI/UX Interface Design', 'Custom Web Development', 'SaaS Product Strategy'].map(service => (
-                        <label key={service} className="flex items-center gap-3 cursor-pointer group">
-                          <input className="w-5 h-5 rounded border-slate-300 text-[#0e5e8a] focus:ring-[#0e5e8a]" type="checkbox"/>
-                          <span className="text-slate-700 group-hover:text-[#0e5e8a] transition-colors">{service}</span>
-                        </label>
+                        <div 
+                          key={service} 
+                          onClick={() => toggleService(service)}
+                          className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                            formData.services.includes(service) 
+                            ? 'bg-[#0e5e8a]/5 border-[#0e5e8a] text-[#0e5e8a]' 
+                            : 'bg-slate-50 border-transparent hover:border-slate-200 text-slate-600'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-lg">
+                            {formData.services.includes(service) ? 'check_box' : 'check_box_outline_blank'}
+                          </span>
+                          <span className="text-sm font-bold">{service}</span>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -126,11 +170,19 @@ const Contact: React.FC = () => {
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-8">
                   <div className="flex flex-col gap-6">
                     <span className="text-base font-semibold text-slate-900">Estimated Project Budget <span className="text-red-500">*</span></span>
-                    <div className="flex flex-col gap-4">
-                      {['$5,000 - $10,000', '$10,000 - $25,000', '$25,000 - $50,000', '$50,000+'].map(range => (
-                        <label key={range} className="flex items-center gap-3 cursor-pointer group">
-                          <input className="w-5 h-5 border-slate-300 text-[#0e5e8a] focus:ring-[#0e5e8a]" name="budget" type="radio"/>
-                          <span className="text-slate-700">{range}</span>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {['$5k-$10k', '$10k-$25k', '$25k-$50k', '$50k+'].map(range => (
+                        <label key={range} className="relative group cursor-pointer">
+                          <input 
+                            className="peer hidden" 
+                            name="budget" 
+                            type="radio" 
+                            required
+                            onChange={() => setFormData({...formData, budget: range})}
+                          />
+                          <div className="flex items-center justify-center p-3 rounded-xl border-2 border-slate-100 text-xs font-bold text-slate-500 peer-checked:border-[#0e5e8a] peer-checked:bg-[#0e5e8a] peer-checked:text-white transition-all hover:bg-slate-50">
+                            {range}
+                          </div>
                         </label>
                       ))}
                     </div>
@@ -139,39 +191,42 @@ const Contact: React.FC = () => {
 
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-8">
                   <label className="flex flex-col gap-6">
-                    <span className="text-base font-semibold text-slate-900">Project Details & Vision <span className="text-red-500">*</span></span>
+                    <span className="text-base font-semibold text-slate-900">Project Details <span className="text-red-500">*</span></span>
                     <textarea 
                       required
-                      className="border-b-2 border-slate-200 focus:border-[#0e5e8a] transition-all duration-300 outline-none py-2 bg-transparent text-lg placeholder:text-slate-300 placeholder:font-light focus:ring-0 px-0 resize-none" 
-                      placeholder="Your answer" 
+                      value={formData.details}
+                      onChange={(e) => setFormData({...formData, details: e.target.value})}
+                      className="border-b-2 border-slate-200 focus:border-[#0e5e8a] transition-all duration-300 outline-none py-2 bg-transparent text-lg placeholder:text-slate-300 focus:ring-0 px-0 resize-none" 
+                      placeholder="Describe your vision..." 
                       rows={4}
                     ></textarea>
                   </label>
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-4">
-                  <button className="w-full md:w-auto px-10 py-3 bg-[#0e5e8a] text-white font-bold rounded-lg hover:bg-slate-800 transition-all shadow-lg shadow-[#0e5e8a]/10" type="submit">
-                    Submit Proposal
+                  <button 
+                    disabled={isSubmitting}
+                    className="w-full md:w-auto px-12 py-4 bg-[#0e5e8a] text-white font-bold rounded-2xl hover:bg-slate-900 transition-all shadow-xl shadow-[#0e5e8a]/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3" 
+                    type="submit"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        Processing...
+                      </>
+                    ) : (
+                      'Submit Proposal'
+                    )}
                   </button>
-                  <div className="flex items-center gap-2 text-slate-400 text-xs">
-                    <span className="material-symbols-outlined text-sm">lock</span>
-                    Secure form. NDA available.
+                  <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-widest">
+                    <span className="material-symbols-outlined text-sm">verified_user</span>
+                    Data Protected by NDA
                   </div>
                 </div>
               </form>
             </div>
           </div>
         </div>
-
-        <section className="mt-24 pt-16 border-t border-slate-200">
-          <p className="text-center text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px] mb-12">Trusted by Global Innovators</p>
-          <div className="flex flex-wrap justify-center gap-16 md:gap-24 opacity-30 grayscale contrast-125">
-            <img alt="Techflow Logo" className="h-6 md:h-8" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlRgGcsDD7MuIZhDOysRUj4ZlByOMt_NsOoT14OfErxx6EiP4Oh-d2J14A4U0wl0gR9Gz-G4kxLsTRLRnKN2X4BCHEST_MbA4rvIRyiKMbgJJRe_YslNQBhZG2GgVh7p7h3Z-PrC4tRiJkLUoOAic2pnWrMmvzvf9TwR7y-DCu9hnSlwrZoqajVKVy-FaYQTZLYcbT21gR3NeGkmX41sTpHyLjMexGv5xeOmOUxh5AvcQ3P4UzfjZ9eKRiqbSH7T5xIee_ODzkDlgf"/>
-            <img alt="Nexus Logo" className="h-6 md:h-8" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRCgBrGGBNk0--zHsS6MXRc_c0EUUVp1B3NpXOq2H4zHGoNyVZGj4Qv9ob_MdQqD_jVck3F3oorVc_sTk41s0vmzMzTt28GN1dQil-vWst74E1iqNhEJz-SfGAKf4NMnAISBRUzoxyizReFKCBsI6_1fOVZkWHOKFS1sJp8AHf2c3ILQuDxJJdr7-maTm_i9VLKqfn0NT9QuIhwZcA7YoDUqZpUodVWUZGZXPPyVqNOsRI2jUEmnlTSufzibX6U5PRH8iAZWf2gkAn"/>
-            <img alt="Orbit Logo" className="h-6 md:h-8" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCo0OREqGy2kBSsNhkXfLZAqKFj4pAgwjV1r_ox5x_BAb06pnoffy6ue1xMNkOIG-zW0Tlk5rKO9HSa4_x1uIue6Q_o87iGJgwEMN4kJiyCG1CVc9Z3x-mlj5hChqE31gzl9-Adepkc4MEIG0Ruj8DQ8bE15WWGqJlqkJwHVp2py91TDfQhqnBcIhD43Da1Vdee7cmmRI4QPn6WSRxQ260NKLkOqvi8ujGuFH6Lu2QcMrtYnBBz87JYqU5l8kj1bDfWdmf4qrTJhH5W"/>
-            <img alt="Vantage Logo" className="h-6 md:h-8" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEU_2SJ5K1FWyulPG6Bb8eASIvkVtWJcTmH2QuWnufVbgHl1exRG8DbmP_S888rbt58EZbaa773WmnsSzKT1RMa5NQySieBLSM4TnutsQghpFbLXWunukiOtxgQvHE-EK07uRQHWUiraxaSbbuXB4MDQh8cfAHFzOA1UjibO63D_s5KXy9jET0UeInTS9eK8fbXXyIhWUwqlgKwZa9vpUTyFSwDlmu3aFTBRtws_hrfFM4gtAiUar-mOoyrzeTSuW4p3LpIzEV_0Ns"/>
-          </div>
-        </section>
       </main>
     </div>
   );
