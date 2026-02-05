@@ -16,7 +16,7 @@ const Navbar = () => {
           <img
             src="https://ik.imagekit.io/qbnsahjpu/assets/Arivoli/arivoli-logo.jpeg?updatedAt=1770328291783"
             alt="Arivoli logo"
-            className="h-9 w-auto object-cover transition-transform scale-[2] origin-left group-hover:scale-[2.05]"
+            className="h-9 w-auto object-cover transition-transform scale-[1.3] origin-left group-hover:scale-[1.35]"
             loading="eager"
             decoding="async"
           />
@@ -64,7 +64,7 @@ const Footer = () => (
           <img
             src="https://ik.imagekit.io/qbnsahjpu/assets/Arivoli/arivoli-logo.jpeg?updatedAt=1770328291783"
             alt="Arivoli logo"
-            className="h-8 w-auto object-cover scale-[2] origin-left"
+            className="h-8 w-auto object-cover scale-[1.3] origin-left"
             loading="lazy"
             decoding="async"
           />
