@@ -161,7 +161,7 @@ const Services: React.FC = () => {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] lg:min-h-[50vh] pt-20 pb-16 px-6 overflow-hidden bg-white/50 flex items-center">
+      <section className="relative min-h-[90vh] md:min-h-[50vh] lg:min-h-[50vh] pt-20 pb-16 px-6 overflow-hidden bg-white/50 flex items-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full opacity-20 pointer-events-none">
           <div className="absolute top-10 right-10 w-96 h-96 bg-[#11b4d4] rounded-full blur-[120px]"></div>
           <div className="absolute bottom-10 left-10 w-96 h-96 bg-[#0e5e8a] rounded-full blur-[120px]"></div>
