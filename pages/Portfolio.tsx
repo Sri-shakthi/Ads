@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const Portfolio: React.FC = () => {
+  const [reelsReady, setReelsReady] = React.useState(false);
+  const reelsSectionRef = React.useRef<HTMLDivElement>(null);
   const reels = [
     {
       name: 'Ganesh Bhavan',
@@ -24,6 +26,22 @@ const Portfolio: React.FC = () => {
   ];
 
   useEffect(() => {
+    if (!reelsSectionRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setReelsReady(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(reelsSectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!reelsReady) return;
     const scriptId = 'instagram-embed-script';
     if (document.getElementById(scriptId)) {
       // @ts-expect-error Instagram injects this.
@@ -39,7 +57,7 @@ const Portfolio: React.FC = () => {
       window.instgrm?.Embeds?.process?.();
     };
     document.body.appendChild(script);
-  }, []);
+  }, [reelsReady]);
 
   return (
     <div className="bg-white min-h-screen">
@@ -53,46 +71,53 @@ const Portfolio: React.FC = () => {
           </p>
         </div>
 
-        <div className="mx-auto max-w-[1200px] px-6 pb-32 animate-fade-in-up [animation-delay:0.1s]">
+        <div
+          ref={reelsSectionRef}
+          className="mx-auto max-w-[1200px] px-6 pb-32 animate-fade-in-up [animation-delay:0.1s]"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {reels.map((reel) => (
               <div
                 key={reel.permalink}
                 className="bg-white border border-slate-100 rounded-3xl overflow-hidden p-4"
               >
-                <blockquote
-                  className="instagram-media"
-                  data-instgrm-permalink={reel.permalink}
-                  data-instgrm-version="14"
-                  style={{
-                    background: '#fff',
-                    border: 0,
-                    margin: 0,
-                    maxWidth: '540px',
-                    minWidth: '280px',
-                    padding: 0,
-                    width: '100%'
-                  }}
-                >
-                  <div style={{ padding: 16 }}>
-                    <a
-                      href={reel.permalink}
-                      style={{
-                        background: '#fff',
-                        lineHeight: 0,
-                        padding: 0,
-                        textAlign: 'center',
-                        textDecoration: 'none',
-                        width: '100%',
-                        display: 'block'
-                      }}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      View this post on Instagram
-                    </a>
-                  </div>
-                </blockquote>
+                {reelsReady ? (
+                  <blockquote
+                    className="instagram-media"
+                    data-instgrm-permalink={reel.permalink}
+                    data-instgrm-version="14"
+                    style={{
+                      background: '#fff',
+                      border: 0,
+                      margin: 0,
+                      maxWidth: '540px',
+                      minWidth: '280px',
+                      padding: 0,
+                      width: '100%'
+                    }}
+                  >
+                    <div style={{ padding: 16 }}>
+                      <a
+                        href={reel.permalink}
+                        style={{
+                          background: '#fff',
+                          lineHeight: 0,
+                          padding: 0,
+                          textAlign: 'center',
+                          textDecoration: 'none',
+                          width: '100%',
+                          display: 'block'
+                        }}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        View this post on Instagram
+                      </a>
+                    </div>
+                  </blockquote>
+                ) : (
+                  <div className="h-[420px] w-full rounded-2xl bg-slate-100 animate-pulse" />
+                )}
                 <div className="pt-4 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-bold text-slate-900">{reel.name}</p>

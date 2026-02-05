@@ -52,7 +52,9 @@ const services: Service[] = [
 
 const Services: React.FC = () => {
   const [filter, setFilter] = useState('All');
+  const [reelsReady, setReelsReady] = useState(false);
   const reelsRef = useRef<HTMLDivElement>(null);
+  const reelsSectionRef = useRef<HTMLDivElement>(null);
 
   const filteredServices = filter === 'All' 
     ? services 
@@ -117,6 +119,22 @@ const Services: React.FC = () => {
   ];
 
   useEffect(() => {
+    if (!reelsSectionRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setReelsReady(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(reelsSectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!reelsReady) return;
     const scriptId = 'instagram-embed-script';
     if (document.getElementById(scriptId)) {
       // @ts-expect-error Instagram injects this.
@@ -132,7 +150,7 @@ const Services: React.FC = () => {
       window.instgrm?.Embeds?.process?.();
     };
     document.body.appendChild(script);
-  }, []);
+  }, [reelsReady]);
 
   const scrollReels = (direction: 'left' | 'right') => {
     if (!reelsRef.current) return;
@@ -205,7 +223,9 @@ const Services: React.FC = () => {
               <div className="lg:w-[45%] h-[320px] lg:h-auto overflow-hidden bg-slate-100">
                 <img 
                   alt={service.title} 
-                  loading="lazy"
+                  loading={idx === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  fetchPriority={idx === 0 ? 'high' : 'auto'}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-0"
                   onLoad={(e) => (e.currentTarget.classList.add('opacity-100'))}
                   src={service.image} 
@@ -254,7 +274,10 @@ const Services: React.FC = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="bg-white py-24 px-6 border-y border-slate-100 animate-fade-in-up opacity-0 [animation-fill-mode:forwards] [animation-delay:0.4s]">
+      <section
+        ref={reelsSectionRef}
+        className="bg-white py-24 px-6 border-y border-slate-100 animate-fade-in-up opacity-0 [animation-fill-mode:forwards] [animation-delay:0.4s]"
+      >
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h3 className="text-3xl font-black text-slate-900 mb-4">Loved by Leading Brands</h3>
@@ -279,39 +302,43 @@ const Services: React.FC = () => {
                   className="min-w-[280px] md:min-w-[360px] snap-center bg-white border border-slate-100 rounded-3xl overflow-hidden p-4"
                 >
                   <div className="instagram-embed">
-                    <blockquote
-                      className="instagram-media"
-                      data-instgrm-permalink={reel.permalink}
-                      data-instgrm-version="14"
-                      style={{
-                        background: '#fff',
-                        border: 0,
-                        margin: 0,
-                        maxWidth: '540px',
-                        minWidth: '280px',
-                        padding: 0,
-                        width: '100%'
-                      }}
-                    >
-                      <div style={{ padding: 16 }}>
-                        <a
-                          href={reel.permalink}
-                          style={{
-                            background: '#fff',
-                            lineHeight: 0,
-                            padding: 0,
-                            textAlign: 'center',
-                            textDecoration: 'none',
-                            width: '100%',
-                            display: 'block'
-                          }}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          View this post on Instagram
-                        </a>
-                      </div>
-                    </blockquote>
+                    {reelsReady ? (
+                      <blockquote
+                        className="instagram-media"
+                        data-instgrm-permalink={reel.permalink}
+                        data-instgrm-version="14"
+                        style={{
+                          background: '#fff',
+                          border: 0,
+                          margin: 0,
+                          maxWidth: '540px',
+                          minWidth: '280px',
+                          padding: 0,
+                          width: '100%'
+                        }}
+                      >
+                        <div style={{ padding: 16 }}>
+                          <a
+                            href={reel.permalink}
+                            style={{
+                              background: '#fff',
+                              lineHeight: 0,
+                              padding: 0,
+                              textAlign: 'center',
+                              textDecoration: 'none',
+                              width: '100%',
+                              display: 'block'
+                            }}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            View this post on Instagram
+                          </a>
+                        </div>
+                      </blockquote>
+                    ) : (
+                      <div className="h-[420px] w-full rounded-2xl bg-slate-100 animate-pulse" />
+                    )}
                   </div>
                   <div className="pt-4 flex items-center justify-between">
                     <div>
